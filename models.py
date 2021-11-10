@@ -1,6 +1,7 @@
 
 import nn
 
+
 class PerceptronModel(object):
     def __init__(self, dimensions):
         """
@@ -57,8 +58,6 @@ class PerceptronModel(object):
                     nn.Parameter.update(self.w, data[0], -1)
 
 
-
-
 class RegressionModel(object):
     """
     A neural network model for approximating a function that maps from real
@@ -67,7 +66,14 @@ class RegressionModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        self.w_1 = nn.Parameter(1, 10)
+        self.b_1 = nn.Parameter(1, 10)
+
+        self.w_2 = nn.Parameter(10, 1)
+        self.b_2 = nn.Parameter(1, 1)
+
+        self.batch_size = 0
+        self.alpha = -0.01
 
     def run(self, x):
         """
@@ -78,7 +84,12 @@ class RegressionModel(object):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
-        "*** YOUR CODE HERE ***"
+        if self.batch_size == 0:
+            self.batch_size = x.data.shape[0]
+
+        first_bias = nn.ReLU(nn.AddBias(nn.Linear(x, self.w_1), self.b_1))
+
+        return nn.AddBias(nn.Linear(first_bias, self.w_2), self.b_2)
 
     def get_loss(self, x, y):
         """
@@ -90,13 +101,24 @@ class RegressionModel(object):
                 to be used for training
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        while True:
+            losses = 0
+            for x,y in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(x, y)
+                losses += nn.as_scalar(loss)
+                origin = [self.w_1, self.b_1, self.w_2, self.b_2]
+                gradient = nn.gradients(loss, origin)
+                for i in range(len(origin)):
+                    origin[i].update(gradient[i], self.alpha)
+            if losses / dataset.x.shape[0] < 0.02:
+                break
+
 
 class DigitClassificationModel(object):
     """
@@ -152,6 +174,7 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+
 
 class LanguageIDModel(object):
     """
