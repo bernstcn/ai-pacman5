@@ -136,7 +136,18 @@ class DigitClassificationModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        # w_1 is first layer weight of neurons 1-784 in input layer to neurons 1-16 in hidden layer
+        self.w_1 = nn.Parameter(784, 100)
+        self.b_1 = nn.Parameter(1, 100)
+
+        # w_2 is second layer neurons 1-16 in hidden layer to neurons 1-10 in output layer
+        self.w_2 = nn.Parameter(100, 10)
+        self.b_2 = nn.Parameter(1, 10)
+
+        self.batch_size = 5
+
+        # alpha or learning rate
+        self.alpha = -0.01
 
     def run(self, x):
         """
@@ -152,7 +163,9 @@ class DigitClassificationModel(object):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+        first_bias = nn.ReLU(nn.AddBias(nn.Linear(x, self.w_1), self.b_1))
+
+        return nn.AddBias(nn.Linear(first_bias, self.w_2), self.b_2)
 
     def get_loss(self, x, y):
         """
@@ -167,13 +180,21 @@ class DigitClassificationModel(object):
             y: a node with shape (batch_size x 10)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        return nn.SoftmaxLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        while True:
+            for x, y in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(x, y)
+                origin = [self.w_1, self.b_1, self.w_2, self.b_2]
+                gradient = nn.gradients(loss, origin)
+                for i in range(len(origin)):
+                    origin[i].update(gradient[i], self.alpha)
+            if dataset.get_validation_accuracy() >= 0.975:
+                break
 
 
 class LanguageIDModel(object):
