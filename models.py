@@ -214,7 +214,11 @@ class LanguageIDModel(object):
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
 
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        self.batch_size = 0
+        self.alpha = -0.01
+        self.w_1 = nn.Parameter(self.num_chars, 100)
+        self.w_2 = nn.Parameter(100, 100)
+        self.w_3 = nn.Parameter(100, len(self.languages))
 
     def run(self, xs):
         """
@@ -245,7 +249,18 @@ class LanguageIDModel(object):
             A node with shape (batch_size x 5) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+        if self.batch_size == 0:
+            self.batch_size = xs[0].data.shape[0]
+
+        f = nn.ReLU(nn.Linear(xs[0], self.w_1))
+
+        for i in range(len(xs)):
+            if i == 0:
+                continue
+            else:
+                f = nn.ReLU(nn.Add(nn.Linear(xs[i], self.w_1), nn.Linear(f, self.w_2)))
+
+        return nn.Linear(f, self.w_3)
 
     def get_loss(self, xs, y):
         """
@@ -261,10 +276,18 @@ class LanguageIDModel(object):
             y: a node with shape (batch_size x 5)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        return nn.SoftmaxLoss(self.run(xs), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        while True:
+            for x, y in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(x, y)
+                origin = [self.w_1, self.w_2, self.w_3]
+                gradient = nn.gradients(loss, origin)
+                for i in range(len(origin)):
+                    origin[i].update(gradient[i], self.alpha)
+            if dataset.get_validation_accuracy() >= 0.83:
+                break
