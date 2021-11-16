@@ -66,10 +66,10 @@ class RegressionModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        self.w_1 = nn.Parameter(1, 10)
-        self.b_1 = nn.Parameter(1, 10)
+        self.w_1 = nn.Parameter(1, 400)
+        self.b_1 = nn.Parameter(1, 400)
 
-        self.w_2 = nn.Parameter(10, 1)
+        self.w_2 = nn.Parameter(400, 1)
         self.b_2 = nn.Parameter(1, 1)
 
         self.batch_size = 0
