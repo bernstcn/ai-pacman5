@@ -136,11 +136,11 @@ class DigitClassificationModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        # w_1 is first layer weight of neurons 1-784 in input layer to neurons 1-16 in hidden layer
+        # w_1 is first layer weight of neurons 1-784 in input layer to neurons 1-100 in hidden layer
         self.w_1 = nn.Parameter(784, 100)
         self.b_1 = nn.Parameter(1, 100)
 
-        # w_2 is second layer neurons 1-16 in hidden layer to neurons 1-10 in output layer
+        # w_2 is second layer neurons 1-100 in hidden layer to neurons 1-10 in output layer
         self.w_2 = nn.Parameter(100, 10)
         self.b_2 = nn.Parameter(1, 10)
 
